@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puntos de Interés</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            padding: 20px;
+        }
+        label, input {
+            display: block;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        #results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Encuentra puntos de interés cercanos</h1>
+    <form id="coordForm">
+        <label for="lat">Latitud:</label>
+        <input type="text" id="lat" name="lat" placeholder="Introduce la latitud">
+        <label for="lng">Longitud:</label>
+        <input type="text" id="lng" name="lng" placeholder="Introduce la longitud">
+        <button type="submit">Buscar</button>
+    </form>
+
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('coordForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            
+            const lat = document.getElementById('lat').value;
+            const lng = document.getElementById('lng').value;
+
+            const apiUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:1000,${lat},${lng})[tourism];out;`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = '';
+                    data.elements.forEach(place => {
+                        const name = place.tags.name || 'Sin nombre';
+                        const tourismType = place.tags.tourism || 'Desconocido';
+                        resultsDiv.innerHTML += `<p><strong>${name}</strong> - Tipo: ${tourismType}</p>`;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('results').innerHTML = '<p>Error al obtener los datos.</p>';
+                });
+        });
+    </script>
+</body>
+</html>
